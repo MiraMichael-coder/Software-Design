@@ -3,7 +3,12 @@ package com.crm.customer.model;
 import com.crm.common.Employee;
 import com.crm.common.enums.ComplaintStatus;
 import java.time.LocalDateTime;
+import com.crm.persistence.SlaConfigurationManager;
+import com.crm.customer.sla.SlaCalculator;
+import lombok.*;
 
+@Getter
+@Setter
 public class Complaint {
     private String complaintId;
     private ComplaintStatus status;
@@ -12,29 +17,14 @@ public class Complaint {
     private LocalDateTime createdAt;
     private Employee assignedTo;
 
-    public Complaint(String complaintId, String priority) {
+    public Complaint(String complaintId, String priority, SlaCalculator slaCalculator) {
         this.complaintId = complaintId;
         this.priority = priority;
-        this.slaDeadline = LocalDateTime.now().plusHours(24);;
+        int baseSla = SlaConfigurationManager.getInstance().getSlaHours();
+        this.slaDeadline = slaCalculator.calculateDeadline(priority, baseSla);
         this.status = ComplaintStatus.Open;
         this.createdAt = LocalDateTime.now();
     }
-
-    public String getComplaintId() { return complaintId; }
-    public void setComplaintId(String complaintId) { this.complaintId = complaintId; }
-
-    public ComplaintStatus getStatus() { return status; }
-    public void setStatus(ComplaintStatus status) { this.status = status; }
-
-    public String getPriority() { return priority; }
-    public void setPriority(String priority) { this.priority = priority; }
-
-    public LocalDateTime getSlaDeadline() { return slaDeadline; }
-    public void setSlaDeadline(LocalDateTime slaDeadline) { this.slaDeadline = slaDeadline; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-
-    public Employee getAssignedTo() { return assignedTo; }
 
     public void assignTo(Employee employee) {
         this.assignedTo = employee;
@@ -48,8 +38,8 @@ public class Complaint {
     public boolean isSlaBreached() {
         return slaDeadline != null && LocalDateTime.now().isAfter(slaDeadline) && status != ComplaintStatus.Resolved;
     }
-    public void  ComplaintDetails()
-    {
+
+    public void ComplaintDetails() {
         System.out.println("Complaint Details:");
         System.out.println("ComplaintId: " + complaintId);
         System.out.println("Priority: " + priority);

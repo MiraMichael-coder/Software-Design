@@ -1,7 +1,5 @@
 package com.crm.reporting.model;
 
-import com.crm.reporting.ReportRenderer;
-
 // Bridge Pattern — Refined Abstraction for order details reports.
 public class OrderReport extends Report {
     public OrderReport(String reportId, ReportRenderer renderer) {
@@ -9,8 +7,17 @@ public class OrderReport extends Report {
     }
 
     @Override
-    public void generate() {
-        // Skeleton: no actual report generation
-        renderer.render(reportId, "OrderReport");
+    protected void collectData() {
+        System.out.println("[OrderReport] Collecting order records...");
+    }
+
+    @Override
+    protected void formatData() {
+        System.out.println("[OrderReport] Formatting order data...");
+    }
+
+    @Override
+    protected String getReportType() {
+        return "OrderReport";
     }
 }

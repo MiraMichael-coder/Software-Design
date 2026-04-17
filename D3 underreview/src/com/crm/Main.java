@@ -48,9 +48,9 @@ import com.crm.order.model.Delivery;
 import com.crm.order.model.LoggingDeliveryDecorator;
 import com.crm.order.model.NotifyingDeliveryDecorator;
 import com.crm.order.model.AlertingDeliveryDecorator;
-import com.crm.reporting.ConsoleReportRenderer;
 import com.crm.reporting.controller.ReportController;
-import com.crm.reporting.CsvReportRenderer;
+import com.crm.reporting.model.ConsoleReportRenderer;
+import com.crm.reporting.model.CsvReportRenderer;
 import com.crm.reporting.model.OrderReport;
 import com.crm.communication.Notification;
 import com.crm.communication.ChannelNotification;
@@ -91,7 +91,7 @@ public class Main {
                 testAdapterPattern(); // Adapter Pattern (ERP Integration)
                 testDecoratorPatternDelivery(); // Decorator: Delivery Status
                 testBridgePatternCommunication(); // Bridge: Communication Channels
-                testComplaintSystem(); // Complaint Controller Demo
+                // testComplaintSystem(); // Complaint Controller Demo
         }
 
         private static void setupSharedObjects() {
@@ -327,7 +327,7 @@ public class Main {
                 InventoryRecordRepository invRepo = new InventoryRecordRepository();
                 InventoryController invCtrl = new InventoryController(invRepo);
 
-                InventoryRecord record = new InventoryRecord("REC-X", sharedProduct2.getProductId(), "Zayed Warehouse", 
+                InventoryRecord record = new InventoryRecord("REC-X", sharedProduct2.getProductId(), "Zayed Warehouse",
                                 50, 10);
                 invCtrl.createInventoryRecord(record);
 
@@ -371,16 +371,18 @@ public class Main {
                 System.out.println("======================================================");
         }
 
-        private static void testComplaintSystem() {
-                System.out.println("========== Testing Complaint System (Controller) ==========");
-                ComplaintRepository complaintRepo = new ComplaintRepository();
-                ComplaintController complaintCtrl = new ComplaintController(complaintRepo);
+        // private static void testComplaintSystem() {
+        // System.out.println("========== Testing Complaint System (Controller)
+        // ==========");
+        // ComplaintRepository complaintRepo = new ComplaintRepository();
+        // ComplaintController complaintCtrl = new ComplaintController(complaintRepo);
 
-                Complaint complaint = new Complaint("CMP-001", "High Priority");
-                complaintCtrl.createComplaint(complaint);
+        // Complaint complaint = new Complaint("CMP-001", "High Priority");
+        // complaintCtrl.createComplaint(complaint);
 
-                System.out.println("Complaint CMP-001 created for Customer [" + sharedCustomer.getName() + "]");
-                System.out.println("Priority: " + complaint.getPriority());
-                System.out.println("======================================================");
-        }
+        // System.out.println("Complaint CMP-001 created for Customer [" +
+        // sharedCustomer.getName() + "]");
+        // System.out.println("Priority: " + complaint.getPriority());
+        // System.out.println("======================================================");
+        // }
 }

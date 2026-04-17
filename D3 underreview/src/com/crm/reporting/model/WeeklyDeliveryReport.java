@@ -1,7 +1,5 @@
 package com.crm.reporting.model;
 
-import com.crm.reporting.ReportRenderer;
-
 // Bridge Pattern — Refined Abstraction for weekly delivery performance reports.
 public class WeeklyDeliveryReport extends Report {
     public WeeklyDeliveryReport(String reportId, ReportRenderer renderer) {
@@ -9,7 +7,17 @@ public class WeeklyDeliveryReport extends Report {
     }
 
     @Override
-    public void generate() {
-        renderer.render(reportId, "WeeklyDeliveryReport");
+    protected void collectData() {
+        System.out.println("[WeeklyDeliveryReport] Collecting delivery records for the week...");
+    }
+
+    @Override
+    protected void formatData() {
+        System.out.println("[WeeklyDeliveryReport] Formatting delivery statistics...");
+    }
+
+    @Override
+    protected String getReportType() {
+        return "WeeklyDeliveryReport";
     }
 }

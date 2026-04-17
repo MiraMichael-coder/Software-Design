@@ -1,8 +1,8 @@
 package com.crm.reporting.factory;
 
-import com.crm.reporting.ReportRenderer;
 import com.crm.reporting.model.CustomerSummaryReport;
 import com.crm.reporting.model.Report;
+import com.crm.reporting.model.ReportRenderer;
 
 public class CustomerReportFactory implements ReportFactory {
     private ReportRenderer renderer;
