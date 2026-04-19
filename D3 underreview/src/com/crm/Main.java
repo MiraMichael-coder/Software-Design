@@ -18,6 +18,8 @@ import com.crm.order.model.Order;
 import com.crm.customer.controller.ComplaintController;
 import com.crm.customer.repository.ComplaintRepository;
 import com.crm.customer.model.Complaint;
+import com.crm.customer.model.ComplaintEscalationHandler;
+import com.crm.customer.model.ComplaintEscalationHandlerService;
 import com.crm.payment.controller.PaymentController;
 import com.crm.payment.repository.PaymentRepository;
 import com.crm.payment.repository.RefundRepository;
@@ -91,7 +93,7 @@ public class Main {
                 testAdapterPattern(); // Adapter Pattern (ERP Integration)
                 testDecoratorPatternDelivery(); // Decorator: Delivery Status
                 testBridgePatternCommunication(); // Bridge: Communication Channels
-                // testComplaintSystem(); // Complaint Controller Demo
+                testComplaintSystem(); // Mediator Pattern Demo
         }
 
         private static void setupSharedObjects() {
@@ -371,18 +373,40 @@ public class Main {
                 System.out.println("======================================================");
         }
 
-        // private static void testComplaintSystem() {
-        // System.out.println("========== Testing Complaint System (Controller)
-        // ==========");
-        // ComplaintRepository complaintRepo = new ComplaintRepository();
-        // ComplaintController complaintCtrl = new ComplaintController(complaintRepo);
+        private static void testComplaintSystem() {
+                System.out.println("========== Testing Complaint System (Controller & SLA Checks) ==========");
+                ComplaintRepository complaintRepo = new ComplaintRepository();
+                ComplaintController complaintCtrl = new ComplaintController(complaintRepo);
+                SlaBreachAlertController alertCtrl = new SlaBreachAlertController(new AlertRepository());
+                CommunicationController commCtrl = new CommunicationController();
+                ComplaintEscalationHandler mediator = new ComplaintEscalationHandlerService(complaintCtrl, alertCtrl,
+                                commCtrl);
+                complaintCtrl.setMediator(mediator);
 
-        // Complaint complaint = new Complaint("CMP-001", "High Priority");
-        // complaintCtrl.createComplaint(complaint);
+                Complaint complaint = new Complaint("CMP-001", "High Priority",
+                                new com.crm.customer.SlaCalculator.StandardSlaCalculator());
+                complaintCtrl.createComplaint(complaint);
+                System.out.println("Complaint CMP-001 created for Customer [" + sharedCustomer.getName() + "]");
+                System.out.println("Priority: " + complaint.getPriority());
 
-        // System.out.println("Complaint CMP-001 created for Customer [" +
-        // sharedCustomer.getName() + "]");
-        // System.out.println("Priority: " + complaint.getPriority());
-        // System.out.println("======================================================");
-        // }
+                CommunicationFactory commFactory = new SMSFactory();
+
+                System.out.println("\n--- 1. Attempt Breach Check (No breach yet) ---");
+                // Will hit the early return block since it's just created!
+                complaintCtrl.detectSlaBreach(complaint, sharedCustomer, sharedEmployee, commFactory);
+
+                System.out.println("\n--- 2. Simulating Time Passing -> Real SLA Breach ---");
+                // Cheat the clock backwards by 72 hours
+                complaint.setSlaDeadline(java.time.LocalDateTime.now().minusHours(72));
+                // Will now successfully breach and call the mediator
+                complaintCtrl.detectSlaBreach(complaint, sharedCustomer, sharedEmployee, commFactory);
+
+                System.out.println("\n--- 3. Testing Resolved Status ---");
+                // If it's resolved, it should not escalate again
+                complaint.updateStatus(com.crm.common.enums.ComplaintStatus.Resolved);
+                complaintCtrl.detectSlaBreach(complaint, sharedCustomer, sharedEmployee, commFactory);
+
+                System.out.println("======================================================");
+        }
+
 }

@@ -2,9 +2,11 @@ package com.crm.customer.model;
 
 import com.crm.common.Employee;
 import com.crm.common.enums.ComplaintStatus;
+import com.crm.customer.SlaCalculator.SlaCalculator;
+
 import java.time.LocalDateTime;
 import com.crm.persistence.SlaConfigurationManager;
-import com.crm.customer.sla.SlaCalculator;
+
 import lombok.*;
 
 @Getter
@@ -36,7 +38,8 @@ public class Complaint {
     }
 
     public boolean isSlaBreached() {
-        return slaDeadline != null && LocalDateTime.now().isAfter(slaDeadline) && status != ComplaintStatus.Resolved;
+        return slaDeadline != null && LocalDateTime.now().isAfter(slaDeadline)
+                && status != ComplaintStatus.Resolved;
     }
 
     public void ComplaintDetails() {

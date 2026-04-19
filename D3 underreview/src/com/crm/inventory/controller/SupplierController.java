@@ -143,10 +143,12 @@ public class SupplierController implements StockObserver {
                 purchaseOrderRepository.save(poId, autoPo);
                 System.out.println("Auto-reorder PO '" + poId + "' created for product '"
                         + event.getProductId() + "' (supplier: " + event.getSupplierId() + ").");
+
             } else {
                 System.out.println("Auto-reorder PO '" + poId + "' created for product '"
                         + event.getProductId() + "' (supplier: " + event.getSupplierId() + ", not persisted).");
             }
+            supplierDataService.pushPurchaseOrder(autoPo);
         }
     }
 }

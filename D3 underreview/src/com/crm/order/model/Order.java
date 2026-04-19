@@ -8,6 +8,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 @Getter
@@ -93,6 +94,10 @@ public class Order {
 
     public List<OrderItem> getItems() {
         return Collections.unmodifiableList(items);
+    }
+
+    public Iterator<OrderItem> highValueItemIterator(double minPrice) {
+        return new HVOrderitem(items, minPrice);
     }
 
 }
