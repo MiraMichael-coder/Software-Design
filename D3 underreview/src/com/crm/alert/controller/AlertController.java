@@ -2,15 +2,15 @@ package com.crm.alert.controller;
 
 import com.crm.alert.model.SystemAlert;
 import com.crm.alert.repository.AlertRepository;
-import com.crm.alert.factory.AlertFactory;
+import com.crm.alert.providers.AlertProvider;
 
 public abstract class AlertController {
     protected final AlertRepository alertRepository;
-    protected final AlertFactory alertFactory;
+    protected final AlertProvider alertProvider;
 
-    public AlertController(AlertRepository alertRepository, AlertFactory alertFactory) {
+    public AlertController(AlertRepository alertRepository, AlertProvider alertProvider) {
         this.alertRepository = alertRepository;
-        this.alertFactory = alertFactory;
+        this.alertProvider = alertProvider;
     }
 
     // This is the operation that uses the factory object

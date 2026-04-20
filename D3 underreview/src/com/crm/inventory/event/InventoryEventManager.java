@@ -28,10 +28,10 @@ public final class InventoryEventManager {
         return instance;
     }
 
-    private final List<StockObserver> observers = new ArrayList<>();
+    private final List<StockListener> observers = new ArrayList<>();
 
     // add observer
-    public void register(StockObserver observer) {
+    public void register(StockListener observer) {
         if (observer == null)
             System.out.println("observer is null");
         else {
@@ -42,7 +42,7 @@ public final class InventoryEventManager {
     }
 
     // remove observer
-    public void unregister(StockObserver observer) {
+    public void unregister(StockListener observer) {
         observers.remove(observer);
     }
 
@@ -50,7 +50,7 @@ public final class InventoryEventManager {
     public void notify(String productId, String supplierId, int newQuantity, Money unitPrice) {
         StockChangedEvent event = new StockChangedEvent(productId, supplierId, newQuantity, unitPrice);
 
-        for (StockObserver ob : observers) {
+        for (StockListener ob : observers) {
             ob.onStockChanged(event);
         }
     }

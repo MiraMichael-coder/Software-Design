@@ -2,7 +2,7 @@ package com.crm.customer.model;
 
 import com.crm.alert.controller.SlaBreachAlertController;
 import com.crm.communication.controller.CommunicationController;
-import com.crm.communication.factory.CommunicationFactory;
+import com.crm.communication.providers.CommunicationChannelProvider;
 import com.crm.customer.controller.ComplaintController;
 import com.crm.common.Employee;
 
@@ -26,7 +26,7 @@ public class ComplaintEscalationHandlerService implements ComplaintEscalationHan
 
     @Override
     public void onSlaBreached(Complaint complaint, Customer customer, Employee supervisor,
-            CommunicationFactory factory) {
+            CommunicationChannelProvider factory) {
         System.out.println("[Mediator] SLA breached detected for complaint: " + complaint.getComplaintId());
 
         complaint.assignTo(supervisor);

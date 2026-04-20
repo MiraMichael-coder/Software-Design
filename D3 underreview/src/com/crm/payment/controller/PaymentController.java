@@ -1,6 +1,6 @@
 package com.crm.payment.controller;
 
-import com.crm.payment.factory.PaymentFactory;
+import com.crm.payment.providers.PaymentProvider;
 import com.crm.payment.model.*;
 import com.crm.payment.repository.PaymentRepository;
 import com.crm.payment.repository.RefundRepository;
@@ -14,7 +14,7 @@ public class PaymentController {
         this.refundRepository = refundRepository;
     }
 
-    public void processPayment(PaymentTransaction paymentTransaction, PaymentFactory factory) {
+    public void processPayment(PaymentTransaction paymentTransaction, PaymentProvider factory) {
 
         System.out.println("Processing " + paymentTransaction.getMethod() + " payment for Order: "
                 + paymentTransaction.getOrderId());

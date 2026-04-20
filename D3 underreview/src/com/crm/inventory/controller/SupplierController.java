@@ -1,7 +1,7 @@
 package com.crm.inventory.controller;
 
 import com.crm.inventory.event.StockChangedEvent;
-import com.crm.inventory.event.StockObserver;
+import com.crm.inventory.event.StockListener;
 import com.crm.inventory.model.PurchaseOrder;
 import com.crm.inventory.model.Supplier;
 import com.crm.inventory.repository.PurchaseOrderRepository;
@@ -9,7 +9,7 @@ import com.crm.inventory.repository.SupplierRepository;
 import com.crm.inventory.service.SupplierDataService;
 
 // concrete Observer/subscriber 
-public class SupplierController implements StockObserver {
+public class SupplierController implements StockListener {
 
     private final SupplierRepository supplierRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
@@ -123,13 +123,13 @@ public class SupplierController implements StockObserver {
         if (supplierDataService == null) {
             System.out.println("""
                     No ERP adapter configured.
-                    Use SupplierController(repo, new ErpSupplierAdapter()) to enable ERP operations.""");
+                    Use SupplierController(repo, new ErpSupplierConnector()) to enable ERP operations.""");
             return false;
         }
         return true;
     }
 
-    // StockObserver — automatic auto-reorder on stock-change events
+    // StockListener — automatic auto-reorder on stock-change events
     @Override
     public void onStockChanged(StockChangedEvent event) {
         if (event.getNewQuantity() <= 0) {

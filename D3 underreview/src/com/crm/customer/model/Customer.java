@@ -23,11 +23,20 @@ public class Customer {
         this.phone = phone;
         this.status = CustomerStatus.Active;
         this.createdAt = LocalDateTime.now();
-        this.totalSpending = 0.0;
-        this.lastActivityDate = LocalDateTime.now();
-        this.region = "Unknown";
+      
     }
-
+public Customer(String customerId, String name, String email, String phone, double totalSpending, 
+    LocalDateTime lastActivityDate, String regionl,CustomerStatus status) {
+        this.customerId = customerId;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.status = status;
+        this.createdAt = LocalDateTime.now();
+        this.totalSpending = totalSpending;
+        this.lastActivityDate = lastActivityDate;
+        this.region = region;
+    }
     public String getCustomerId() {
         return customerId;
     }

@@ -1,19 +1,19 @@
 package com.crm.customer.model;
 
-import com.crm.customer.strategy.SegmentationStrategy;
+import com.crm.customer.policies.SegmentationPolicy;
 
 public class CustomerSegment {
     private String segmentId;
     private String name;
     private String criteriaDescription;
-    private SegmentationStrategy strategy;
+    private SegmentationPolicy strategy;
 
     public CustomerSegment(String segmentId, String name, String criteriaDescription) {
         this(segmentId, name, criteriaDescription, null);
     }
 
     public CustomerSegment(String segmentId, String name, String criteriaDescription,
-            com.crm.customer.strategy.SegmentationStrategy strategy) {
+            com.crm.customer.policies.SegmentationPolicy strategy) {
         this.segmentId = segmentId;
         this.name = name;
         this.criteriaDescription = criteriaDescription;
@@ -44,11 +44,11 @@ public class CustomerSegment {
         this.criteriaDescription = criteriaDescription;
     }
 
-    public com.crm.customer.strategy.SegmentationStrategy getStrategy() {
+    public com.crm.customer.policies.SegmentationPolicy getStrategy() {
         return strategy;
     }
 
-    public void setStrategy(com.crm.customer.strategy.SegmentationStrategy strategy) {
+    public void setStrategy(com.crm.customer.policies.SegmentationPolicy strategy) {
         this.strategy = strategy;
     }
 
