@@ -33,7 +33,7 @@ public final class InventoryEventManager {
     // add observer
     public void register(StockListener observer) {
         if (observer == null)
-            System.out.println("observer is null");
+            System.out.println("Listener is null");
         else {
             if (!observers.contains(observer)) {
                 observers.add(observer);

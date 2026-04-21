@@ -664,6 +664,7 @@ public class Main {
                         System.out.println("8) Update product details");
                         System.out.println("9) Show low stock alerts");
                         System.out.println("10) Trigger Priority Low Stock Alarm");
+                        System.out.println("11) Test Memory Optimization via Object Reuse");
                         System.out.println("0) Back");
 
                         int choice = readInt("Select an option: ");
@@ -678,6 +679,7 @@ public class Main {
                                 case 8 -> inventoryUpdateProduct();
                                 case 9 -> showKnownAlerts();
                                 case 10 -> inventoryCreateDecoratedLowStockAlert();
+                                case 11 -> inventoryTestProductCaching();
                                 case 0 -> running = false;
                                 default -> System.out.println("Invalid option.");
                         }
@@ -803,6 +805,27 @@ public class Main {
                 }
                 productController.updateProduct(p);
                 System.out.println("Product updated.");
+        }
+
+        private static void inventoryTestProductCaching() {
+                System.out.println("\n--- Testing Product Object Reuse ---");
+                String productId = readString("Enter Product ID to retrieve: ");
+                String name = readString("Enter Product Name: ");
+                Product p1 = ProductCreator.getOrCreate(productId, name, "Interactive Test", new Money(100.0, "EGP"),
+                                10, sharedSupplierId);
+                System.out.println("Retrieved: " + p1.getName() + " (Memory ID: " + System.identityHashCode(p1) + ")");
+
+                System.out.println("Attempting to retrieve the exact same Product ID...");
+                Product p2 = ProductCreator.getOrCreate(productId, "Different Name (should be ignored)",
+                                "Different Desc", new Money(100.0, "EGP"), 10, sharedSupplierId);
+                System.out.println("Retrieved: " + p2.getName() + " (Memory ID: " + System.identityHashCode(p2) + ")");
+
+                if (p1 == p2) {
+                        System.out.println(
+                                        "Success: Both product references point to the exact same object in memory! Creation overhead bypassed.");
+                } else {
+                        System.out.println("Failure: Objects are mysteriously different.");
+                }
         }
 
         private static void inventoryCreateDecoratedLowStockAlert() {
@@ -1051,16 +1074,16 @@ public class Main {
         }
 
         private static void testSingleton() {
-                System.out.println("========== Testing Singleton Pattern ==========");
+                System.out.println("========== Testing Database Connection Optimization ==========");
 
                 DatabaseConnectionManager db1 = DatabaseConnectionManager.getInstance();
                 DatabaseConnectionManager db2 = DatabaseConnectionManager.getInstance();
 
                 db1.connect();
                 if (db1 == db2) {
-                        System.out.println("Singleton works! Both references point to the same instance.");
+                        System.out.println("Optimization works! Both references point to the same instance.");
                 } else {
-                        System.out.println("Singleton failed! Instances are different.");
+                        System.out.println("Optimization failed! Instances are different.");
                 }
                 db1.disconnect();
 
@@ -1073,9 +1096,9 @@ public class Main {
                 AlertRepository alertRepo = new AlertRepository();
                 InventoryAlertController inventoryAlertCtrl = new InventoryAlertController(alertRepo);
 
-                System.out.println("--- Demo 1: Factory Method Alert ---");
+                System.out.println("--- Demo 1: Dynamic Alert Construction ---");
                 SystemAlert rawAlert = inventoryAlertCtrl.processAlert("ALT-001", sharedProduct.getProductId());
-                System.out.println("Alert created via Factory: " + rawAlert.getClass().getSimpleName());
+                System.out.println("Alert created dynamically: " + rawAlert.getClass().getSimpleName());
 
                 System.out.println("\n--- Demo 2: Decorated Alert (Logging + Escalation + Retry) ---");
                 SystemAlert decoratedSla = new RetryingAlert(
@@ -1090,7 +1113,7 @@ public class Main {
 
         // 5 + 10. REPORT SYSTEM (Factory Method & Bridge Patterns)
         private static void testReportSystem() {
-                System.out.println("========== Testing Report System (Factory & Bridge) ==========");
+                System.out.println("========== Testing Flexible Report Generation System ==========");
                 ReportController reportController = new ReportController();
 
                 // Showcasing Bridge via Factory
@@ -1135,19 +1158,20 @@ public class Main {
 
         // INVENTORY & PRODUCT SYSTEM (Flyweight, Controller, Records)
         private static void testInventoryAndProducts() {
-                System.out.println("========== Testing Inventory & Product System (Flyweight & Records) ==========");
+                System.out.println(
+                                "========== Testing Inventory & Product System (Object Caching & Records) ==========");
 
                 // Part 1: Flyweight
-                System.out.println("--- Flyweight Pattern ---");
+                System.out.println("--- Memory Optimization ---");
                 Product p1 = ProductCreator.getOrCreate(sharedProduct.getProductId(), "Mouse", "Recycled",
                                 new Money(10.0, "USD"), 10, sharedSupplierId);
                 if (p1 == sharedProduct) {
-                        System.out.println("Flyweight verified: Reused existing product object.");
+                        System.out.println("Optimization verified: Reused existing product memory reference.");
                 }
                 Product p2 = ProductCreator.getOrCreate(sharedProduct2.getProductId(), "Keyboard", "Recycled",
                                 new Money(10.0, "USD"), 10, sharedSupplierId);
                 if (p2 == sharedProduct2) {
-                        System.out.println("Flyweight verified: Reused existing product object.");
+                        System.out.println("Optimization verified: Reused existing product memory reference.");
                 }
 
                 // Part 2: Product & Inventory Controllers
@@ -1205,7 +1229,7 @@ public class Main {
 
         // 4 + 8. PAYMENT SYSTEM (Abstract Factory, Adapter, & Controller)
         private static void testPaymentSystem() {
-                System.out.println("========== Testing Payment System (Factory, Adapter, & Controller) ==========");
+                System.out.println("========== Testing Multi-Gateway Payment System ==========");
 
                 // Set up Controller
                 PaymentRepository payRepo = new PaymentRepository();
@@ -1213,13 +1237,13 @@ public class Main {
                 PaymentController payCtrl = new PaymentController(payRepo, refundRepo);
 
                 // Demo 1: Controller using a specific Factory (CardPaymentProvider)
-                System.out.println("--- Demo 1: Standard Card Payment (Manual Factory Injection) ---");
+                System.out.println("--- Demo 1: Standard Card Payment (Manual Injection) ---");
                 PaymentTransaction transaction1 = new PaymentTransaction("TXN-001", "ORD-123", new Money(100.0, "USD"),
                                 PaymentMethodType.Card);
                 payCtrl.processPayment(transaction1, new CardPaymentProvider());
 
                 // Demo 2: Controller using internal Adapter logic (Stripe)
-                System.out.println("\n--- Demo 2: External Gateway Payment (Internal Adapter Logic) ---");
+                System.out.println("\n--- Demo 2: External Gateway Payment (Translation Logic) ---");
                 PaymentTransaction transaction2 = new PaymentTransaction("TXN-002", "ORD-999", new Money(50.0, "USD"),
                                 PaymentMethodType.Card);
                 // The controller will automatically use StripePaymentProvider for Card method
@@ -1236,7 +1260,7 @@ public class Main {
 
         // 6. ADAPTER PATTERN — ErpSupplierAdapter + SupplierController
         private static void testAdapterPattern() {
-                System.out.println("========== Testing Adapter Pattern (ERP Integration) ==========");
+                System.out.println("========== Testing ERP Integration Translation ==========");
 
                 SupplierRepository supplierRepo = new SupplierRepository();
                 PurchaseOrderRepository poRepo = new PurchaseOrderRepository();
@@ -1267,7 +1291,7 @@ public class Main {
 
         // 11. BRIDGE PATTERN — Communication Channels
         private static void testBridgePatternCommunication() {
-                System.out.println("========== Testing Bridge Pattern (Communication) ==========");
+                System.out.println("========== Testing Extensible Communication Channels ==========");
 
                 // SMS Bridge
                 System.out.println("--- Sending via SMS Channel ---");
@@ -1356,7 +1380,7 @@ public class Main {
         }
 
         private static void testDecoratorPatternDelivery() {
-                System.out.println("========== Testing Decorator Pattern & Order Controller ==========");
+                System.out.println("========== Testing Dynamic Behavior Extension & Order Controller ==========");
 
                 // Set up Order and Controller
                 OrderRepository orderRepo = new OrderRepository();

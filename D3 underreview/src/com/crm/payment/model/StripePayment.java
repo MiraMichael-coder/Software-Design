@@ -17,7 +17,7 @@ public class StripePayment extends PaymentProcessor {
     protected boolean authorize(Money amount) {
         // Stripe expects the amount in cents.
         double amountInCents = amount.getAmount() * 100;
-        System.out.println("[StripeAdapter] Authorising charge via Stripe: "
+        System.out.println("[StripeGateway] Authorising charge via Stripe: "
                 + amountInCents + " cents in " + amount.getCurrency());
         return stripeClient.charge(amountInCents, amount.getCurrency());
     }
@@ -25,6 +25,6 @@ public class StripePayment extends PaymentProcessor {
     @Override
     protected void capture(Money amount) {
         // Stripe's charge() is atomic — funds already settled in authorize().
-        System.out.println("[StripeAdapter] Funds captured by Stripe (settled during authorisation).");
+        System.out.println("[StripeGateway] Funds captured by Stripe (settled during authorisation).");
     }
 }
