@@ -807,25 +807,31 @@ public class Main {
                 System.out.println("Product updated.");
         }
 
-        private static void inventoryTestProductCaching() {
-                System.out.println("\n--- Testing Product Object Reuse ---");
-                String productId = readString("Enter Product ID to retrieve: ");
-                String name = readString("Enter Product Name: ");
-                Product p1 = ProductCreator.getOrCreate(productId, name, "Interactive Test", new Money(100.0, "EGP"),
-                                10, sharedSupplierId);
-                System.out.println("Retrieved: " + p1.getName() + " (Memory ID: " + System.identityHashCode(p1) + ")");
+        private static void checkAndPrintObjectReuse(String productId, String name) {
+                System.out.println("\n--- Memory Optimization Demo for: " + productId + " ---");
+                Product p1 = ProductCreator.getOrCreate(productId, name, "Category A", new Money(10.0, "USD"), 10,
+                                sharedSupplierId);
+                System.out.println(
+                                "First retrieval [" + p1.getName() + "] -> Memory ID: " + System.identityHashCode(p1));
 
-                System.out.println("Attempting to retrieve the exact same Product ID...");
-                Product p2 = ProductCreator.getOrCreate(productId, "Different Name (should be ignored)",
-                                "Different Desc", new Money(100.0, "EGP"), 10, sharedSupplierId);
-                System.out.println("Retrieved: " + p2.getName() + " (Memory ID: " + System.identityHashCode(p2) + ")");
+                Product p2 = ProductCreator.getOrCreate(productId, "Ignored Alternate Name", "Category B",
+                                new Money(10.0, "USD"), 10, sharedSupplierId);
+                System.out.println(
+                                "Second retrieval [" + p2.getName() + "] -> Memory ID: " + System.identityHashCode(p2));
 
                 if (p1 == p2) {
                         System.out.println(
-                                        "Success: Both product references point to the exact same object in memory! Creation overhead bypassed.");
+                                        "Optimization verified: Both references point to the exact same object in memory. Creation overhead bypassed!");
                 } else {
-                        System.out.println("Failure: Objects are mysteriously different.");
+                        System.out.println("Optimization failed: Objects are mysteriously different.");
                 }
+        }
+
+        private static void inventoryTestProductCaching() {
+                System.out.println("\n--- Interactive Product Object Reuse ---");
+                String productId = readString("Enter Product ID to retrieve: ");
+                String name = readString("Enter Product Name: ");
+                checkAndPrintObjectReuse(productId, name);
         }
 
         private static void inventoryCreateDecoratedLowStockAlert() {
@@ -1162,17 +1168,8 @@ public class Main {
                                 "========== Testing Inventory & Product System (Object Caching & Records) ==========");
 
                 // Part 1: Flyweight
-                System.out.println("--- Memory Optimization ---");
-                Product p1 = ProductCreator.getOrCreate(sharedProduct.getProductId(), "Mouse", "Recycled",
-                                new Money(10.0, "USD"), 10, sharedSupplierId);
-                if (p1 == sharedProduct) {
-                        System.out.println("Optimization verified: Reused existing product memory reference.");
-                }
-                Product p2 = ProductCreator.getOrCreate(sharedProduct2.getProductId(), "Keyboard", "Recycled",
-                                new Money(10.0, "USD"), 10, sharedSupplierId);
-                if (p2 == sharedProduct2) {
-                        System.out.println("Optimization verified: Reused existing product memory reference.");
-                }
+                checkAndPrintObjectReuse(sharedProduct.getProductId(), "Mouse");
+                checkAndPrintObjectReuse(sharedProduct2.getProductId(), "Keyboard");
 
                 // Part 2: Product & Inventory Controllers
                 System.out.println("\n--- Product & Inventory Management Controllers ---");
