@@ -38,7 +38,7 @@ public class ComplaintController {
 
     public void detectSlaBreach(Complaint complaint, Customer customer,
             Employee supervisor, CommunicationChannelProvider factory) {
-        
+
         // Ensure that the complaint is ACTUALLY breached, and NOT already resolved
         if (!complaint.isSlaBreached()) {
             System.out.println("No breach detected or complaint is already resolved. Skipping SLA escalation.");
@@ -50,5 +50,9 @@ public class ComplaintController {
         if (this.mediator != null) {
             this.mediator.onSlaBreached(complaint, customer, supervisor, factory);
         }
+    }
+
+    public boolean isSlaBreached(Complaint complaint) {
+        return complaint.isSlaBreached();
     }
 }

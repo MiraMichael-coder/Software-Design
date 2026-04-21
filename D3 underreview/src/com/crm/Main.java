@@ -330,6 +330,7 @@ public class Main {
                 // ========== COMPLAINTS ==========
                 Complaint complaint1 = new Complaint("CMP-001", "high", new StandardSlaCalculator());
                 Complaint complaint2 = new Complaint("CMP-002", "critical", new PriorityBasedSlaCalculator(24));
+                complaint2.setSlaDeadline(LocalDateTime.now().minusDays(5)); // INTENTIONALLY PRE-BREACHED
                 Complaint complaint3 = new Complaint("CMP-003", "medium", new StandardSlaCalculator());
                 Complaint complaint4 = new Complaint("CMP-004", "low", new VipSlaCalculator());
 
@@ -406,6 +407,7 @@ public class Main {
 
         // ==================== Customer ====================
         private static void customerSupportMenu() {
+
                 boolean running = true;
                 while (running) {
                         System.out.println("\n-------------------- Customer Support --------------------");
@@ -417,7 +419,7 @@ public class Main {
                         System.out.println("6) Send message to customer");
                         System.out.println("7) Show alerts");
                         System.out.println("8) Test customer segmentation");
-                        System.out.println("9) Create decorated SLA alert (Log+Escalate+Retry)");
+                        System.out.println("9) Trigger Priority SLA Breach Alarm");
                         System.out.println("0) Back");
 
                         int choice = readInt("Select an option: ");
@@ -515,24 +517,45 @@ public class Main {
         }
 
         private static void supportEscalateComplaint() {
+                System.out.println("\n[Auto-Check] Scanning for breached SLA complaints....");
+                for (String cid : knownComplaintIds) {
+                        Complaint c = complaintController.getComplaint(cid);
+                        if (c != null && c.isSlaBreached()
+                                        && c.getStatus() != ComplaintStatus.Resolved) {
+                                Customer cust = customerController.retrieveCustomer(sharedCustomer.getCustomerId());
+                                complaintController.detectSlaBreach(c, cust, sharedEmployee,
+                                                new SmsChannelProvider());
+
+                                String alertId = "ALT-SLA-" + cid + "-" + System.currentTimeMillis();
+                                SystemAlert alert = slaBreachAlertController.processAlert(alertId, cid);
+                                knownAlertIds.add(alert.getAlertId());
+                        }
+                }
+                System.out.println("\nChecking complaints manually....");
                 String complaintId = readString("Enter Complaint ID to escalate: ");
                 Complaint complaint = complaintController.getComplaint(complaintId);
                 if (complaint == null) {
                         System.out.println("Complaint not found.");
                         return;
                 }
-
                 Customer customer = customerController.retrieveCustomer(sharedCustomer.getCustomerId());
-                CommunicationChannelProvider commProvider = selectCommunicationChannelProvider();
+                if (complaintController.isSlaBreached(complaint)) {
 
-                System.out.println("Simulating SLA breach check...");
-                complaint.setSlaDeadline(LocalDateTime.now().minusHours(1));
-                complaintController.detectSlaBreach(complaint, customer, sharedEmployee, commProvider);
+                        CommunicationChannelProvider commProvider = selectCommunicationChannelProvider();
+                        // checking if comaplint is breached and not resolved
+                        complaintController.detectSlaBreach(complaint, customer, sharedEmployee, commProvider);
 
-                String alertId = "ALT-SLA-" + complaintId + "-" + System.currentTimeMillis();
-                SystemAlert alert = slaBreachAlertController.processAlert(alertId, complaintId);
-                knownAlertIds.add(alert.getAlertId());
-                System.out.println("Escalation flow completed.");
+                        String alertId = "ALT-SLA-" + complaintId + "-" + System.currentTimeMillis();
+                        SystemAlert alert = slaBreachAlertController.processAlert(alertId, complaintId);
+                        knownAlertIds.add(alert.getAlertId());
+                        System.out.println("Escalation flow completed.");
+
+                } else if (complaint.getStatus() == ComplaintStatus.Resolved) {
+                        System.out.println("Complaint is already resolved.");
+                } else {
+                        System.out.println("Complaint ID: " + complaintId + "For customer" + customer.getName()
+                                        + " Status is " + complaint.getStatus());
+                }
         }
 
         private static void supportCreateComplaint() {
@@ -613,7 +636,7 @@ public class Main {
                 String complaintId = readString("Enter Complaint ID for SLA alert: ");
                 String alertId = "ALT-SLA-DEC-" + complaintId + "-" + System.currentTimeMillis();
 
-                System.out.println("\n--- Creating Decorated SLA Alert (Logging + Escalation + Retry) ---");
+                System.out.println("\n--- Triggering Priority SLA Alarm (Logging + Escalation + Retry) ---");
                 SystemAlert decoratedSla = new RetryingAlert(
                                 new EscalatingAlert(
                                                 new LoggedAlert(
@@ -623,7 +646,7 @@ public class Main {
                 knownAlertIds.add(decoratedSla.getAlertId());
                 System.out.println("Triggering decorated alert notification...");
                 decoratedSla.notifyTarget();
-                System.out.println("Decorated SLA alert created and triggered successfully.");
+                System.out.println("Priority SLA alarm triggered successfully.");
         }
 
         // ==================== Inventory ====================
@@ -635,12 +658,12 @@ public class Main {
                         System.out.println("2) Create purchase order");
                         System.out.println("3) View all purchase orders");
                         System.out.println("4) View all suppliers");
-                        System.out.println("5) Fetch supplier data from ERP (Adapter)");
+                        System.out.println("5) Check External ERP for Supplier Updates");
                         System.out.println("6) Manually deduct stock");
                         System.out.println("7) Increase stock");
                         System.out.println("8) Update product details");
                         System.out.println("9) Show low stock alerts");
-                        System.out.println("10) Create decorated low stock alert (Log+Escalate+Retry)");
+                        System.out.println("10) Trigger Priority Low Stock Alarm");
                         System.out.println("0) Back");
 
                         int choice = readInt("Select an option: ");
@@ -670,7 +693,7 @@ public class Main {
                 for (InventoryRecord r : records) {
                         System.out.println("- " + r.getRecordId() + " | Product: " + r.getProductId() + " | Warehouse: "
                                         + r.getWarehouseName() + " | Available: " + r.getAvailableQuantity()
-                                        + " | Reorder: " + r.getReorderLevel());
+                                        + " | Reorder level : " + r.getReorderLevel());
                 }
         }
 
@@ -786,7 +809,7 @@ public class Main {
                 String productId = readString("Enter Product ID for low stock alert: ");
                 String alertId = "ALT-LOW-DEC-" + productId + "-" + System.currentTimeMillis();
 
-                System.out.println("\n--- Creating Decorated Low Stock Alert (Logging + Escalation + Retry) ---");
+                System.out.println("\n--- Triggering Priority Low Stock Alarm (Logging + Escalation + Retry) ---");
                 SystemAlert decoratedAlert = new RetryingAlert(
                                 new EscalatingAlert(
                                                 new LoggedAlert(
@@ -796,7 +819,7 @@ public class Main {
                 knownAlertIds.add(decoratedAlert.getAlertId());
                 System.out.println("Triggering decorated alert notification...");
                 decoratedAlert.notifyTarget();
-                System.out.println("Decorated low stock alert created and triggered successfully.");
+                System.out.println("Priority low stock alarm triggered successfully.");
         }
 
         // ==================== Orders & Payments ====================
@@ -806,7 +829,7 @@ public class Main {
                         System.out.println("\n-------------------- Orders & Payments --------------------");
                         System.out.println("1) Display customer order history");
                         System.out.println("2) Show payment details");
-                        System.out.println("3) Checkout flow ");// MEDIATOR
+                        System.out.println("3) Initiate Smart Checkout");
                         System.out.println("4) Update order status based on payment status");
                         System.out.println("5) View order items");
                         System.out.println("0) Back");
@@ -834,6 +857,7 @@ public class Main {
                                 System.out.println("- " + o.getOrderId() + " | " + o.getStatus() + " | Total: "
                                                 + o.getTotalAmount().getAmount() + " "
                                                 + o.getTotalAmount().getCurrency());
+
                         }
                 }
                 if (!found) {
@@ -884,6 +908,16 @@ public class Main {
                 Delivery delivery = new Delivery("DEL-" + System.currentTimeMillis(), orderId, address,
                                 LocalDateTime.now().plusDays(2));
 
+                int decChoice = readInt(
+                                "Select delivery update preferences (0=Standard, 1=Basic Tracking, 2=With Notifications, 3=With Priority Alerts): ");
+                if (decChoice == 1) {
+                        delivery = new LoggedDelivery(delivery);
+                } else if (decChoice == 2) {
+                        delivery = new NotifyingDelivery(new LoggedDelivery(delivery));
+                } else if (decChoice == 3) {
+                        delivery = new AlertingDelivery(new NotifyingDelivery(new LoggedDelivery(delivery)));
+                }
+
                 CommunicationChannelProvider commProvider = selectCommunicationChannelProvider();
                 orderFulfillmentMediator.processCheckout(order, paymentTx, customer, delivery, paymentFactory,
                                 commProvider);
@@ -926,7 +960,7 @@ public class Main {
                         return;
                 }
 
-                System.out.println("\n--- Order Items (Standard Iterator via getItems()) ---");
+                System.out.println("Order ID: " + orderId + "\n--- Order Items ---");
                 Iterator<OrderItem> itemIterator = order.getItems().iterator();
                 int count = 0;
                 while (itemIterator.hasNext()) {
