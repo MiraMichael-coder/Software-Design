@@ -1,7 +1,7 @@
 package com.crm.inventory.controller;
 
 import com.crm.inventory.event.StockChangedEvent;
-import com.crm.inventory.event.StockObserver;
+import com.crm.inventory.event.StockListener;
 import com.crm.inventory.model.PurchaseOrder;
 import com.crm.inventory.model.Supplier;
 import com.crm.inventory.repository.PurchaseOrderRepository;
@@ -9,7 +9,7 @@ import com.crm.inventory.repository.SupplierRepository;
 import com.crm.inventory.service.SupplierDataService;
 
 // concrete Observer/subscriber 
-public class SupplierController {
+public class SupplierController implements StockListener {
 
     private final SupplierRepository supplierRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
@@ -123,16 +123,32 @@ public class SupplierController {
         if (supplierDataService == null) {
             System.out.println("""
                     No ERP adapter configured.
-                    Use SupplierController(repo, new ErpSupplierAdapter()) to enable ERP operations.""");
+                    Use SupplierController(repo, new ErpSupplierConnector()) to enable ERP operations.""");
             return false;
         }
         return true;
     }
 
-    public void pushPurchaseOrder(PurchaseOrder po) {
-        if (!isErpAvailable()) {
-            System.out.println("Cannot push PO — ERP not available.");
-            return;
+    // StockListener — automatic auto-reorder on stock-change events
+    @Override
+    public void onStockChanged(StockChangedEvent event) {
+        if (event.getNewQuantity() <= 0) {
+            String poId = "PO-AUTO-" + event.getProductId() + "-" + System.currentTimeMillis();
+
+            PurchaseOrder autoPo = new PurchaseOrder(
+                    poId, event.getSupplierId(), event.getProductId(), 50,
+                    event.getUnitPrice().multiply(50));
+
+            if (purchaseOrderRepository != null) {
+                purchaseOrderRepository.save(poId, autoPo);
+                System.out.println("Auto-reorder PO '" + poId + "' created for product '"
+                        + event.getProductId() + "' (supplier: " + event.getSupplierId() + ").");
+
+            } else {
+                System.out.println("Auto-reorder PO '" + poId + "' created for product '"
+                        + event.getProductId() + "' (supplier: " + event.getSupplierId() + ", not persisted).");
+            }
+            supplierDataService.pushPurchaseOrder(autoPo);
         }
         supplierDataService.pushPurchaseOrder(po);
         System.out.println("PO " + po.getPurchaseOrderId() + " pushed from CRM to ERP.");

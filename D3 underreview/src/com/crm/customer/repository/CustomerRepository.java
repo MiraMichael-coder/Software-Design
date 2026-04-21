@@ -4,6 +4,7 @@ import com.crm.customer.model.Complaint;
 import com.crm.customer.model.Customer;
 import com.crm.persistence.repository.CrudRepository;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,4 +42,9 @@ public class CustomerRepository implements CrudRepository<Customer> {
 
         }
     }
+
+    public Collection<Customer> findAll() {
+        return repository.values();
+    }
+
 }

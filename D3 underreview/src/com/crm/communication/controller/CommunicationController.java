@@ -1,24 +1,24 @@
 package com.crm.communication.controller;
 
 import com.crm.communication.channel.CommunicationChannel;
-import com.crm.communication.factory.CommunicationFactory;
+import com.crm.communication.providers.CommunicationChannelProvider;
 import com.crm.common.Employee;
 import com.crm.customer.model.Customer;
 import com.crm.customer.model.Message;
 import com.crm.communication.Notification;
 
 public class CommunicationController {
-    public CommunicationChannel selectChannel(CommunicationFactory factory) {
+    public CommunicationChannel selectChannel(CommunicationChannelProvider factory) {
         return factory.createChannel();
     }
 
-    public void sendMessage(CommunicationFactory factory, String to, String messageText) {
+    public void sendMessage(CommunicationChannelProvider factory, String to, String messageText) {
         CommunicationChannel channel = selectChannel(factory);
         channel.sendMessage(to, messageText);
     }
 
     public void sendMessageFromEmployeeToCustomer(Employee employee, Customer customer, String messageText,
-            CommunicationFactory factory) {
+            CommunicationChannelProvider factory) {
         System.out.println(
                 "\n>>> Interaction: Employee [" + employee.getName() + "] -> Customer [" + customer.getName() + "]");
 
@@ -32,7 +32,7 @@ public class CommunicationController {
     }
 
     public void sendMessageFromCustomerToEmployee(Customer customer, Employee employee, String messageText,
-            CommunicationFactory factory) {
+            CommunicationChannelProvider factory) {
         System.out.println(
                 "\n>>> Interaction: Customer [" + customer.getName() + "] -> Employee [" + employee.getName() + "]");
 
