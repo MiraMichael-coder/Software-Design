@@ -664,6 +664,7 @@ public class Main {
                         System.out.println("8) Update product details");
                         System.out.println("9) Show low stock alerts");
                         System.out.println("10) Trigger Priority Low Stock Alarm");
+                        System.out.println("11) Test Memory Optimization via Object Reuse");
                         System.out.println("0) Back");
 
                         int choice = readInt("Select an option: ");
@@ -678,6 +679,7 @@ public class Main {
                                 case 8 -> inventoryUpdateProduct();
                                 case 9 -> showKnownAlerts();
                                 case 10 -> inventoryCreateDecoratedLowStockAlert();
+                                case 11 -> inventoryTestProductCaching();
                                 case 0 -> running = false;
                                 default -> System.out.println("Invalid option.");
                         }
@@ -803,6 +805,33 @@ public class Main {
                 }
                 productController.updateProduct(p);
                 System.out.println("Product updated.");
+        }
+
+        private static void checkAndPrintObjectReuse(String productId, String name) {
+                System.out.println("\n--- Memory Optimization Demo for: " + productId + " ---");
+                Product p1 = ProductCreator.getOrCreate(productId, name, "Category A", new Money(10.0, "USD"), 10,
+                                sharedSupplierId);
+                System.out.println(
+                                "First retrieval [" + p1.getName() + "] -> Memory ID: " + System.identityHashCode(p1));
+
+                Product p2 = ProductCreator.getOrCreate(productId, "Ignored Alternate Name", "Category B",
+                                new Money(10.0, "USD"), 10, sharedSupplierId);
+                System.out.println(
+                                "Second retrieval [" + p2.getName() + "] -> Memory ID: " + System.identityHashCode(p2));
+
+                if (p1 == p2) {
+                        System.out.println(
+                                        "Optimization verified: Both references point to the exact same object in memory. Creation overhead bypassed!");
+                } else {
+                        System.out.println("Optimization failed: Objects are mysteriously different.");
+                }
+        }
+
+        private static void inventoryTestProductCaching() {
+                System.out.println("\n--- Interactive Product Object Reuse ---");
+                String productId = readString("Enter Product ID to retrieve: ");
+                String name = readString("Enter Product Name: ");
+                checkAndPrintObjectReuse(productId, name);
         }
 
         private static void inventoryCreateDecoratedLowStockAlert() {
@@ -1132,26 +1161,6 @@ public class Main {
 
                 System.out.println();
         } // 9. DECORATOR PATTERN & ORDER CONTROLLER
-
-        private static void checkAndPrintObjectReuse(String productId, String name) {
-                System.out.println("\n--- Memory Optimization Demo for: " + productId + " ---");
-                Product p1 = ProductCreator.getOrCreate(productId, name, "Category A", new Money(10.0, "USD"), 10,
-                                sharedSupplierId);
-                System.out.println(
-                                "First retrieval [" + p1.getName() + "] -> Memory ID: " + System.identityHashCode(p1));
-
-                Product p2 = ProductCreator.getOrCreate(productId, "Ignored Alternate Name", "Category B",
-                                new Money(10.0, "USD"), 10, sharedSupplierId);
-                System.out.println(
-                                "Second retrieval [" + p2.getName() + "] -> Memory ID: " + System.identityHashCode(p2));
-
-                if (p1 == p2) {
-                        System.out.println(
-                                        "Optimization verified: Both references point to the exact same object in memory. Creation overhead bypassed!");
-                } else {
-                        System.out.println("Optimization failed: Objects are mysteriously different.");
-                }
-        }
 
         // INVENTORY & PRODUCT SYSTEM (Flyweight, Controller, Records)
         private static void testInventoryAndProducts() {
