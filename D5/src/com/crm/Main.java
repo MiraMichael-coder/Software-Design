@@ -99,6 +99,8 @@ public class Main {
                 System.out.println("Inventory API Link: http://localhost:8080/api/v1/inventory/products");
                 com.crm.api.OrderApiServer.start(orderController, productController);
                 System.out.println("Order API Link: http://localhost:8081/api/v1/orders");
+                com.crm.api.CompositeApiServer.start(orderController, productController, paymentController, communicationController);
+                System.out.println("Composite API (Checkout) Link: http://localhost:8082/api/v1/composite/place-order");
                 runInteractiveConsole();
         }
 
