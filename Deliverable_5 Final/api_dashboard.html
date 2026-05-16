@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM API Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #f3f4f6;
+            --secondary-hover: #e5e7eb;
+            --secondary-text: #374151;
+            --success: #10b981;
+            --error: #ef4444;
+            --focus-ring: rgba(37, 99, 235, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.03) 0, transparent 50%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 3rem 2rem;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+        
+        .panel:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-text);
+        }
+
+        input {
+            width: 100%;
+            background: #f9fafb;
+            border: 1px solid #d1d5db;
+            color: #111827;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px var(--focus-ring);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        button {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            flex: 1;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -2px rgba(37, 99, 235, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.btn-secondary {
+            background: white;
+            color: var(--secondary-text);
+            border: 1px solid #d1d5db;
+        }
+        
+        button.btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .response-container {
+            margin-top: 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+        }
+
+        .status-success { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+        .status-none { background: #f3f4f6; color: #6b7280; }
+
+        .response-area {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.25rem;
+            flex-grow: 1;
+            min-height: 180px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .response-area pre {
+            font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+            font-size: 0.875rem;
+            color: #334155;
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* The Custom Postman-style Table Designs */
+        .table-container {
+            font-family: 'Inter', sans-serif;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-top: 0.5rem;
+        }
+
+        .table-header {
+            background: #1f2937;
+            color: #ffffff;
+            padding: 16px 20px;
+        }
+        
+        .table-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .table-header p {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: #d1d5db;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 600px;
+        }
+
+        th {
+            background: #f9fafb;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>CRM API Dashboard</h1>
+        <p class="subtitle">A stunning, professional interface for testing your REST endpoints</p>
+    </header>
+
+    <div class="grid">
+        <!-- Products Panel -->
+        <div class="panel">
+            <h2>📦 Inventory & Products</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="p-name" placeholder="e.g. Wireless Mouse" value="Wireless Mouse">
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="p-price" placeholder="29.99" value="29.99" style="flex: 2;">
+                        <input type="text" id="p-currency" placeholder="USD" value="USD" style="flex: 1;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Stock Qty</label>
+                    <input type="number" id="p-stock" placeholder="100" value="100">
+                </div>
+                <div class="form-group">
+                    <label>Supplier ID</label>
+                    <input type="text" id="p-supplier" placeholder="SUP-01" value="SUP-01">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="p-desc" placeholder="Ergonomic design..." value="Ergonomic design">
+            </div>
+            
+            <div class="form-group">
+                <label>Fetch Specific Product ID (Optional)</label>
+                <input type="text" id="p-id" placeholder="Leave empty for all, or PROD-100">
+            </div>
+
+            <div class="btn-row">
+                <button onclick="createProduct()">Create (POST)</button>
+                <button class="btn-secondary" onclick="getProducts()">Fetch (GET)</button>
+            </div>
+            <div class="btn-row" style="margin-top: 1rem;">
+                <button class="btn-secondary" onclick="updateProduct()">Update (PUT)</button>
+                <button class="btn-secondary" style="background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="deleteProduct()">Delete (DEL)</button>
+            </div>
+
+            <div class="response-container">
+                <div class="response-header">
+                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--secondary-text)">Response</span>
+                    <span class="status-badge status-none" id="p-status">Waiting...</span>
+                </div>
+                <div class="response-area" id="p-response">
+                    <pre style="color: #9ca3af;">// Output will appear here</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Panel -->
+        <div class="panel">
+            <h2>🛒 Orders Management</h2>
+            
+            <div class="form-group">
+                <label>Customer ID (Required for Creation)</label>
+                <input type="text" id="o-customer" placeholder="e.g. CUST-001" value="CUST-001">
+            </div>
+
+            <div class="form-group">
+                <label>Fetch Specific Order ID (Optional)</label>
+                <input type="text" id="o-id" placeholder="Leave empty for all, or ORD-100">
+            </div>
+            
+            <div style="border-top: 1px solid var(--border); margin: 1rem 0; padding-top: 1rem;">
+                <p style="font-size: 0.875rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.5rem;">New Order Item (Optional)</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product ID</label>
+                        <input type="text" id="o-product-id" placeholder="PROD-01">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="o-quantity" placeholder="1" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Delivery Address</label>
+                    <input type="text" id="o-address" placeholder="123 Main St" value="123 Main St">
+                </div>
+                <div class="form-group">
+                    <label>Order Item ID</label>
+                    <input type="text" id="o-item-id" placeholder="ITM-001">
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button onclick="createOrder()">Create (POST)</button>
+                <button class="btn-secondary" onclick="getOrders()">Fetch (GET)</button>
+            </div>
+            <div class="btn-row" style="margin-top: 1rem;">
+                <button class="btn-secondary" onclick="updateOrderDelivery()">Delivery (PUT)</button>
+                <button class="btn-secondary" style="background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="deleteOrderItem()">Item (DEL)</button>
+            </div>
+
+            <div class="response-container">
+                <div class="response-header">
+                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--secondary-text)">Response</span>
+                    <span class="status-badge status-none" id="o-status">Waiting...</span>
+                </div>
+                <div class="response-area" id="o-response">
+                    <pre style="color: #9ca3af;">// Output will appear here</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const INVENTORY_API_BASE = 'http://127.0.0.1:8080/api/v1';
+    const ORDER_API_BASE = 'http://127.0.0.1:8081/api/v1';
+
+    function visualizeProducts(data) {
+        const items = Array.isArray(data) ? data : (data.error ? [] : [data]);
+        if (items.length === 0) return `<pre>No product data found.</pre>`;
+
+        let rows = items.map(p => `
+            <tr>
+              <td>${p.productId || 'N/A'}</td>
+              <td style="font-weight: 500;">${p.name || 'N/A'}</td>
+              <td style="color: #6b7280;">${p.description || 'N/A'}</td>
+              <td style="font-weight: 500;">${p.unitPrice ? p.unitPrice.amount : 'N/A'}</td>
+              <td>${p.unitPrice ? p.unitPrice.currency : 'N/A'}</td>
+              <td>${p.stockQuantity !== undefined ? p.stockQuantity : 'N/A'}</td>
+              <td><span class="pill" style="background:#f3f4f6; color:#374151;">${p.supplierId || 'N/A'}</span></td>
+            </tr>
+        `).join('');
+
+        return `
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Inventory Products</h3>
+            <p>Showing ${items.length} product${items.length === 1 ? '' : 's'}</p>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product ID</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Price Amount</th>
+                  <th>Currency</th>
+                  <th>Stock Quantity</th>
+                  <th>Supplier ID</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    function visualizeOrders(data) {
+        const items = Array.isArray(data) ? data : (data.error ? [] : [data]);
+        if (items.length === 0) return `<pre>No order data found.</pre>`;
+
+        let rows = items.map(o => `
+            <tr>
+              <td style="font-weight: 500;">${o.orderId || 'N/A'}</td>
+              <td>${o.customerId || 'N/A'}</td>
+              <td><span class="pill" style="background: #ecfdf5; color: #059669;">${o.status || 'N/A'}</span></td>
+              <td style="font-weight: 500;">${o.totalAmount ? o.totalAmount.amount : 'N/A'}</td>
+              <td>${o.totalAmount ? o.totalAmount.currency : 'N/A'}</td>
+              <td><span class="pill" style="background:#f3f4f6; color:#374151;">${o.paymentId || 'Unpaid'}</span></td>
+            </tr>
+        `).join('');
+
+        return `
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Orders Repository</h3>
+            <p>Showing ${items.length} order${items.length === 1 ? '' : 's'}</p>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer ID</th>
+                  <th>Status</th>
+                  <th>Total Amount</th>
+                  <th>Currency</th>
+                  <th>Payment ID</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+
+    function setResponse(panelPrefix, data, status, method) {
+        const container = document.getElementById(`${panelPrefix}-response`);
+        const badge = document.getElementById(`${panelPrefix}-status`);
+        
+        badge.textContent = `${status.code} ${status.text}`;
+        
+        badge.className = 'status-badge';
+        if (status.code >= 200 && status.code < 300) badge.classList.add('status-success');
+        else badge.classList.add('status-error');
+
+        if (method === 'GET' && status.code >= 200 && status.code < 300) {
+            // Remove padding from response-area for edge-to-edge table design
+            container.style.padding = '0';
+            container.style.background = 'transparent';
+            container.style.border = 'none';
+            container.innerHTML = panelPrefix === 'p' ? visualizeProducts(data) : visualizeOrders(data);
+        } else {
+            // Restore styling for JSON output
+            container.style.padding = '1.25rem';
+            container.style.background = '#f8fafc';
+            container.style.border = '1px solid var(--border)';
+            container.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+    }
+
+    async function makeRequest(url, method, panelPrefix, body = null) {
+        document.getElementById(`${panelPrefix}-status`).textContent = 'LOADING...';
+        document.getElementById(`${panelPrefix}-status`).className = 'status-badge status-none';
+        
+        try {
+            const options = {
+                method: method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            const response = await fetch(url, options);
+            const data = await response.json().catch(() => ({ error: "Failed to parse JSON" }));
+            
+            setResponse(panelPrefix, data, { code: response.status, text: response.statusText }, method);
+        } catch (error) {
+            setResponse(panelPrefix, { error: error.message }, { code: 0, text: 'NETWORK ERROR' }, method);
+        }
+    }
+
+    // --- Product Actions ---
+    function getProducts() {
+        const id = document.getElementById('p-id').value.trim();
+        const url = `${INVENTORY_API_BASE}/inventory/products${id ? '/' + id : ''}`;
+        makeRequest(url, 'GET', 'p');
+    }
+
+    function createProduct() {
+        const body = {
+            name: document.getElementById('p-name').value,
+            description: document.getElementById('p-desc').value,
+            priceAmount: parseFloat(document.getElementById('p-price').value),
+            priceCurrency: document.getElementById('p-currency').value.trim() || "USD",
+            stockQuantity: parseInt(document.getElementById('p-stock').value),
+            supplierId: document.getElementById('p-supplier').value
+        };
+        makeRequest(`${INVENTORY_API_BASE}/inventory/products`, 'POST', 'p', body);
+    }
+
+    function updateProduct() {
+        const id = document.getElementById('p-id').value.trim();
+        if (!id) {
+            alert('Please enter a Product ID to update');
+            return;
+        }
+        
+        const body = {};
+        
+        const nameVal = document.getElementById('p-name').value;
+        if (nameVal) body.name = nameVal;
+        
+        const priceVal = document.getElementById('p-price').value;
+        if (priceVal) body.basePrice = parseFloat(priceVal);
+
+        const descVal = document.getElementById('p-desc').value;
+        if (descVal) body.description = descVal;
+
+        const supplierVal = document.getElementById('p-supplier').value;
+        if (supplierVal) body.supplierId = supplierVal;
+        
+        makeRequest(`${INVENTORY_API_BASE}/inventory/products/${id}`, 'PUT', 'p', body);
+    }
+
+    function deleteProduct() {
+        const id = document.getElementById('p-id').value.trim();
+        if (!id) {
+            alert('Please enter a Product ID to delete');
+            return;
+        }
+        makeRequest(`${INVENTORY_API_BASE}/inventory/products/${id}`, 'DELETE', 'p');
+    }
+
+    // --- Order Actions ---
+    function getOrders() {
+        const id = document.getElementById('o-id').value.trim();
+        const url = `${ORDER_API_BASE}/orders${id ? '/' + id : ''}`;
+        makeRequest(url, 'GET', 'o');
+    }
+
+    function createOrder() {
+        const body = {
+            customerId: document.getElementById('o-customer').value
+        };
+        
+        const productId = document.getElementById('o-product-id').value.trim();
+        if (productId) {
+            const quantity = parseInt(document.getElementById('o-quantity').value) || 1;
+            body.items = [
+                {
+                    productId: productId,
+                    quantity: quantity
+                }
+            ];
+        }
+        
+        makeRequest(`${ORDER_API_BASE}/orders`, 'POST', 'o', body);
+    }
+
+    function updateOrderDelivery() {
+        const id = document.getElementById('o-id').value.trim();
+        if (!id) {
+            alert('Please enter an Order ID to update delivery');
+            return;
+        }
+        const body = {
+            address: document.getElementById('o-address').value
+        };
+        makeRequest(`${ORDER_API_BASE}/orders/${id}/delivery`, 'PUT', 'o', body);
+    }
+
+    function deleteOrderItem() {
+        const id = document.getElementById('o-id').value.trim();
+        const itemId = document.getElementById('o-item-id').value.trim();
+        if (!id || !itemId) {
+            alert('Please enter both Order ID and Item ID to remove item');
+            return;
+        }
+        makeRequest(`${ORDER_API_BASE}/orders/${id}/items/${itemId}`, 'DELETE', 'o');
+    }
+</script>
+
+</body>
+</html>
